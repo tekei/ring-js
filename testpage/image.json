@@ -4,12 +4,10 @@
     "abc2":     "image/01.png",
     "width": 23, "height": 20, "diffx": 11, "diffy": 10
   },
-
   "test2": {
     "efg":   "image/03.png",
     "width": 16, "height": 16, "diffx": 18, "diffy": 18
-  }
-
+  },
   "test3": {
     "efg":   "image/03.png",
     "diffx": 18, "diffy": 18
