@@ -32,6 +32,7 @@
 <script type="text/javascript">
 $().ready(function() {
 	var r = jp.jvx.ring.create(document.getElementById("test"));
+	r.loadImageResource("./image.json", function(){ r.draw(); });
 
 	r.addLayer(function(c) {
 		c.beginPath();
@@ -76,6 +77,13 @@ $().ready(function() {
 		c.rect(50, 150, 200, 45);
 
 		c.stroke();
+	});
+
+	r.addLayer(function(c) {
+		c.drawImgResource("test1", "abc1", 250, 10);
+		c.drawImgResource("test1", "abc2", 250, 50);
+		c.drawImgResource("test2", "efg", 250, 100);
+		c.drawImgResource("test3", "efg", 250, 200);
 	});
 
 	r.draw();

@@ -42,6 +42,39 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		return result;
 	}
 
+	var cimg = [];
+	var initError = false;
+
+	function loadImageRes(url, f) {
+		cimg = [];
+
+		$.ajax({ 
+			url: url,
+			type: "POST", 
+			dataType: "json",
+			timeout: 3000,
+			success: function(j, dataType) {
+				for(k in j) cimg[k] = loadImage(j[k]);
+				if(f) f(true);
+			},
+			error: function(req, status, e) {
+				if(f) f(false, e);
+			}
+		});
+	}
+
+	function loadImage(imgUrl) {
+		var imgs = [];
+		for(key in imgUrl) {
+			if(key.match(/^(width|height|diffx|diffy)$/)) {
+				imgs[key] = imgUrl[key];
+			} else {
+				imgs[key] = new Image();
+				imgs[key].src = imgUrl[key];
+			}
+		}
+		return imgs;
+	}
 
 	function initContext(canvas) {
 		var c = canvas.getContext("2d");
@@ -57,7 +90,6 @@ jp.jvx.ring = jp.jvx.ring || function() {
 				this.fill();
 				if(s) this.stroke();
 		};
-
 		c.drawTextBox = function(str, x, y, w, h, lineSpace) {
 			var fontHeight = 12;
 			var p = this.font.split(" ");
@@ -72,8 +104,16 @@ jp.jvx.ring = jp.jvx.ring || function() {
 				this.fillText(layoutStr[i], x, ypos);
 				ypos += (lineSpace + fontHeight);
 			}
-		}
-
+		};
+		c.drawImgResource = function (grp, id, x, y) {
+			var imggrp = cimg[grp];
+			if(!imggrp) return;
+			if(imggrp.width) {
+				this.drawImage(imggrp[id], x - imggrp.diffx, y - imggrp.diffy, imggrp.width, imggrp.height);
+			} else {
+				this.drawImage(imggrp[id], x - imggrp.diffx, y - imggrp.diffy);
+			}
+		};
 		return c;
 	}
 
@@ -92,11 +132,14 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		addLayer: function(l) {
 				layer.push(l);
 			},
-
 		draw: function() {
 				for(var i in layer) layer[i](this.context);
+			},
+		loadImageResource: function(url, f) {
+				loadImageRes(url, f);
 			}
 		}
+		
 		handler.context =  initContext(c);
 		return handler;
 	}} 
