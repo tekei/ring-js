@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-Language" content="ja" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+
+<meta name="format-detection" content="telephone=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />  
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
+
+<title>ring.js</title>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="../ring.js"></script>
+
+</head>
+<body>
+
+<canvas id="test" width="300" height="300">error : not impl canvas.</canvas>
+<style>
+ canvas#test { 
+    border: solid 4px #aaa;
+ }
+</style>
+
+
+<script type="text/javascript">
+$().ready(function() {
+	var r = jp.jvx.ring.create(document.getElementById("test"));
+
+	r.addLayer(function(c) {
+		c.beginPath();
+		c.strokeStyle = "#eee";
+		c.shadowOffsetX = 0;
+		c.shadowOffsetY = 0;
+		c.shadowBlur = 0;
+		c.lineCap = "butt";
+		c.lineWidth = 1;
+
+		for(var x = 0; x < 400; x += 10) {
+			c.moveTo(x, 0); c.lineTo(x, 400);
+		}
+		for(var y = 0; y < 400; y += 10) {
+			c.moveTo(0, y); c.lineTo(400, y);
+		}
+
+		c.stroke();
+	});
+
+	r.addLayer(function(c) {
+		c.strokeStyle = "#888";
+		var grad = c.createLinearGradient(0, 0, 0, 100);
+		grad.addColorStop(0, '#fff');
+		grad.addColorStop(1, '#ccc');
+		c.fillStyle = grad;
+		c.drawRoundedSquare(50, 30, 100, 60, 20);
+
+	});
+
+	r.draw();
+});
+</script>
+
+   </div>
+ </div>
+
+</body>
+<html>
+
