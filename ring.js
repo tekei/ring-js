@@ -10,8 +10,38 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		clear: function() { this.buf = []; },
 		length: function() { return this.buf.length; },
 		append: function(s) { this.buf.push(s); },
-		toString: function() { return this.buf.join(''); }
+		str: function() { return this.buf.join(''); }
 	}
+
+	const contStr = '...';
+
+	function splitMultiLineText(c, str, w, h, fontHeight, lineSpace) {
+		var result = [];
+		if(!str) str = '';
+		if(c.measureText(str).width <= w) { result.push(str); return result; }
+
+		var lineHeight = (fontHeight * 2), lineSize = 0, buf = new StringBuffer(), strSize = str.length;
+		var contStrLen = c.measureText(contStr).width;
+		for(var i = 0;  i < str.length; i++) {
+			lineSize += c.measureText(str.charAt(i)).width;
+			if((h <= lineHeight) && (w < (lineSize + contStrLen))) {
+				buf.append(contStr);
+				result.push(buf.str());
+				buf.clear();
+				break;
+			} else if(w < lineSize) {
+				result.push(buf.str());
+				lineHeight += fontHeight + lineSpace;
+				buf.clear();
+				lineSize = c.measureText(str.charAt(i)).width;
+			}
+			buf.append(str.charAt(i));
+		}
+
+		if(buf.length !== 0) result.push(buf.str());
+		return result;
+	}
+
 
 	function initContext(canvas) {
 		var c = canvas.getContext("2d");
@@ -27,6 +57,23 @@ jp.jvx.ring = jp.jvx.ring || function() {
 				this.fill();
 				if(s) this.stroke();
 		};
+
+		c.drawTextBox = function(str, x, y, w, h, lineSpace) {
+			var fontHeight = 12;
+			var p = this.font.split(" ");
+			for(var i in p) {
+				if(p[i].match(/^[0-9]+px$/)) { fontHeight = parseInt(p[i].split(/px$/)[0]); }
+			}
+
+			var layoutStr = splitMultiLineText(this, str, w, h, fontHeight, lineSpace);
+			var ypos = y;
+			this.textBaseline = "top";
+			for(var i in layoutStr) {
+				this.fillText(layoutStr[i], x, ypos);
+				ypos += (lineSpace + fontHeight);
+			}
+		}
+
 		return c;
 	}
 

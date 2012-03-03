@@ -62,6 +62,22 @@ $().ready(function() {
 
 	});
 
+	r.addLayer(function(c) {
+		c.beginPath();
+		c.fillStyle = "#000";
+		var grad = c.createLinearGradient(0, 0, 0, 100);
+		var ctext0 = "Canvasで文章の折り曲げテスト。最後まで表示できない場合は、省略表示となります。";
+		// 省略パターン
+		c.drawTextBox(ctext0, 150, 80, 100, 40, 1);
+		c.rect(150, 80, 100, 40);
+
+		// 全表示パターン 10pxの空き
+		c.drawTextBox(ctext0, 50, 150, 200, 45, 10);
+		c.rect(50, 150, 200, 45);
+
+		c.stroke();
+	});
+
 	r.draw();
 });
 </script>
