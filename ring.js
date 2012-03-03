@@ -42,11 +42,12 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		return result;
 	}
 
-	var cimg = [];
+	var cimg = {};
 	var initError = false;
 
 	function loadImageRes(url, f) {
-		cimg = [];
+		cimg = {};
+		loadImageFn = f;
 
 		$.ajax({ 
 			url: url,
@@ -55,7 +56,7 @@ jp.jvx.ring = jp.jvx.ring || function() {
 			timeout: 3000,
 			success: function(j, dataType) {
 				for(k in j) cimg[k] = loadImage(j[k]);
-				if(f) f(true);
+				if((imgLoadCount === 0) && loadImageFn) loadImageFn(true);
 			},
 			error: function(req, status, e) {
 				if(f) f(false, e);
@@ -63,14 +64,21 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		});
 	}
 
+	var imgLoadCount = 0;
+	var loadImageFn;
 	function loadImage(imgUrl) {
-		var imgs = [];
+		var imgs = {};
 		for(key in imgUrl) {
 			if(key.match(/^(width|height|diffx|diffy)$/)) {
 				imgs[key] = imgUrl[key];
 			} else {
 				imgs[key] = new Image();
+				imgs[key].onload = function() {
+						imgLoadCount--;
+						if((imgCount === 0) && loadImageFn) loadImageFn(true);
+					};
 				imgs[key].src = imgUrl[key];
+				imgLoadCount++;
 			}
 		}
 		return imgs;
