@@ -36,19 +36,19 @@ mailChartアプリで必要な機能のみを実装。
     * setFormatAsset : 未設定のパラメータについては制御しない (デフォルト値セットはしない)
 
     指定可能なパラメータは
-    * strokeStyle
-    * fillStyle
-    * lineWidth
-    * lineCap
-    * shadowColor
-    * shadowOffsetX
-    * shadowOffsetY
-    * shadowBlur
-    * globalCompositeOperation
-    * font
-    * textAlign
-    * textBaseline
-    * linearGradient : fillStyleのみ利用可。指定方法 = "grad" x1,y1,x2,y2 offset1,color1 ....
+      * strokeStyle
+      * fillStyle
+      * lineWidth
+      * lineCap
+      * shadowColor
+      * shadowOffsetX
+      * shadowOffsetY
+      * shadowBlur
+      * globalCompositeOperation
+      * font
+      * textAlign
+      * textBaseline
+      * linearGradient : fillStyleのみ利用可。指定方法 = "grad" x1,y1,x2,y2 offset1,color1 ....
 
 その他
 ------
