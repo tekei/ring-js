@@ -2,14 +2,110 @@ var jp = jp || {};
 jp.jvx = jp.jvx || {};
 jp.jvx.ring = jp.jvx.ring || function() {
 
-  function ImageContainer() {
-    this.cimg = {};
+  function ResourceContainer() {
     this.loadCount = 0;
     this.loadFinFn;
   }
-  ImageContainer.prototype = {
+  ResourceContainer.prototype = {
     load: function(url, f) {
-      this.cimg = {};
+      if(this.init()) this.init();
+      var t = this;
+
+      $.ajax({ 
+        url: url,
+        type: "POST", 
+        dataType: "json",
+        timeout: 3000,
+        success: function(j, dataType) {
+          t.analyze(j);
+          if((t.loadCount === 0) && f) f(true);
+        },
+        error: function(req, status, e) {
+          if(f) f(false, e);
+        }
+      });
+    }
+    loading: function() {
+      this.loadCount++;
+    }
+    loaded: function() {
+      with(this) {
+        loadCount--;
+        if((loadCount === 0) && loadFinFn) loadFinFn(true);
+      }
+    }
+  }
+
+  function ImageContainer() {}
+  ImageContainer.prototype = new ResourceContainer();
+  ImageContainer.prototype = {
+    init: function() {
+      this.img = {};
+    },
+    analyze: function(j) {
+      for(var grp in j) {
+        var imgs = {};
+        for(var key in j[grp]) {
+          var i = j[grp][key];
+          if(key.match(/^(width|height|diffx|diffy)$/)) {
+            imgs[key] = i;
+          } else {
+            imgs[key] = new Image();
+            imgs[key].onload = function() { this.loaded(); }
+            imgs[key].src = i;
+            this.loading();
+          }
+        }
+        this.img[k] = imgs;
+      }
+    },
+    draw: function(c, grp, id, x, y) {
+      var imggrp = this.img[grp];
+      if(!imggrp) return;
+      var dx = (imggrp.diffx || 0), dy = (imggrp.diffy || 0);
+      if(imggrp.width) {
+        c.drawImage(imggrp[id], x - dx, y - dy, imggrp.width, imggrp.height);
+      } else {
+        c.drawImage(imggrp[id], x - dx, y - dy);
+      }
+    }
+  }
+
+  function StyleContainer() {}
+  StyleContainer.prototype = new ResourceContainer();
+  StyleContainer.prototype = {
+    init: function() {
+      this.style = {};
+    },
+    analyze: function(j) {
+      for(var grp in j) {
+        var styles = {};
+        for(var key in j[grp]) {
+          var i = j[grp][key];
+          if((key === "fillStyle") && (i.indexOf("grad ") == 0)) {
+          } else {
+          }
+        }
+        this.style[k] = styles;
+      }
+    },
+    set: function(c, grp) {
+      if(this.style[k]) {
+      for(var grp in j) {
+      var imggrp = this.img[grp];
+      if(!imggrp) return;
+      var dx = (imggrp.diffx || 0), dy = (imggrp.diffy || 0);
+      if(imggrp.width) {
+        c.drawImage(imggrp[id], x - dx, y - dy, imggrp.width, imggrp.height);
+      } else {
+        c.drawImage(imggrp[id], x - dx, y - dy);
+      }
+    }
+  }
+
+  StyleContainer.prototype = {
+    load: function(url, f) {
+      this.style = {};
       this.loadFinFn = f;
       var t = this;
 
@@ -19,7 +115,7 @@ jp.jvx.ring = jp.jvx.ring || function() {
         dataType: "json",
         timeout: 3000,
         success: function(j, dataType) {
-          for(k in j) t.cimg[k] = t.analyze(j[k]);
+          t.style = t.analyze(j);
           if((t.loadCount === 0) && f) f(true);
         },
         error: function(req, status, e) {
@@ -27,36 +123,6 @@ jp.jvx.ring = jp.jvx.ring || function() {
         }
       });
     },
-    analyze: function(j) {
-      var imgs = {};
-      for(key in j) {
-        if(key.match(/^(width|height|diffx|diffy)$/)) {
-          imgs[key] = j[key];
-        } else {
-          imgs[key] = new Image();
-          with(this) {
-            imgs[key].onload = function() {
-                loadCount--;
-                if((loadCount === 0) && loadFinFn) loadFinFn(true);
-              };
-          }
-          imgs[key].src = j[key];
-          this.loadCount++;
-        }
-      }
-      return imgs;
-    },
-    draw: function(c, grp, id, x, y) {
-      var imggrp = this.cimg[grp];
-      if(!imggrp) return;
-
-      var dx = (imggrp.diffx || 0), dy = (imggrp.diffy || 0);
-      if(imggrp.width) {
-        c.drawImage(imggrp[id], x - dx, y - dy, imggrp.width, imggrp.height);
-      } else {
-        c.drawImage(imggrp[id], x - dx, y - dy);
-      }
-    }
   }
 
   // use drawTextBox
