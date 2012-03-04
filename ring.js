@@ -2,6 +2,17 @@ var jp = jp || {};
 jp.jvx = jp.jvx || {};
 jp.jvx.ring = jp.jvx.ring || function() {
 
+	// use init func.
+	var initError = false;
+	// use drawTextBox
+	const contStr = '...'; 
+	var cimg = {};
+	// use drawImgResource
+	var imgLoadCount = 0;
+	var loadImageFn;
+
+	var layer = [];
+
 	function StringBuffer() {
 	  this.buf = [];
 	}
@@ -12,8 +23,6 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		append: function(s) { this.buf.push(s); },
 		str: function() { return this.buf.join(''); }
 	}
-
-	const contStr = '...';
 
 	function splitMultiLineText(c, str, w, h, fontHeight, lineSpace) {
 		var result = [];
@@ -42,9 +51,6 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		return result;
 	}
 
-	var cimg = {};
-	var initError = false;
-
 	function loadImageRes(url, f) {
 		cimg = {};
 		loadImageFn = f;
@@ -64,8 +70,6 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		});
 	}
 
-	var imgLoadCount = 0;
-	var loadImageFn;
 	function loadImage(imgUrl) {
 		var imgs = {};
 		for(key in imgUrl) {
@@ -75,7 +79,7 @@ jp.jvx.ring = jp.jvx.ring || function() {
 				imgs[key] = new Image();
 				imgs[key].onload = function() {
 						imgLoadCount--;
-						if((imgCount === 0) && loadImageFn) loadImageFn(true);
+						if((imgLoadCount === 0) && loadImageFn) loadImageFn(true);
 					};
 				imgs[key].src = imgUrl[key];
 				imgLoadCount++;
@@ -84,21 +88,20 @@ jp.jvx.ring = jp.jvx.ring || function() {
 		return imgs;
 	}
 
-	function initContext(canvas) {
-		var c = canvas.getContext("2d");
-		c.drawRoundedSquare = function(x, y, w, h, arc, s) {
-				this.beginPath();
-				this.moveTo(x + arc, y);
-				this.arcTo(x + w, y, x + w, y + h - arc, arc);
-				this.arcTo(x + w, y + h, x - arc, y + h, arc);
-				this.arcTo(x, y + h, x, y + arc, arc);
-				this.arcTo(x, y, x + w - arc, y, arc);
-				this.closePath();
-
-				this.fill();
-				if(s) this.stroke();
-		};
-		c.drawTextBox = function(str, x, y, w, h, lineSpace) {
+	var RingContext2d = {
+		drawRoundedSquare: function(x, y, w, h, arc, s) {
+			this.beginPath();
+			this.moveTo(x + arc, y);
+			this.arcTo(x + w, y, x + w, y + h - arc, arc);
+			this.arcTo(x + w, y + h, x - arc, y + h, arc);
+			this.arcTo(x, y + h, x, y + arc, arc);
+			this.arcTo(x, y, x + w - arc, y, arc);
+			this.closePath();
+			this.fill();
+			if(s) this.stroke();
+		},
+		drawTextBox: function(str, x, y, w, h, lineSpace) {
+			lineSpace = lineSpace || 0;
 			var fontHeight = 12;
 			var p = this.font.split(" ");
 			for(var i in p) {
@@ -112,43 +115,41 @@ jp.jvx.ring = jp.jvx.ring || function() {
 				this.fillText(layoutStr[i], x, ypos);
 				ypos += (lineSpace + fontHeight);
 			}
-		};
-		c.drawImgResource = function (grp, id, x, y) {
+		},
+		drawImgResource: function(grp, id, x, y) {
 			var imggrp = cimg[grp];
 			if(!imggrp) return;
+			var dx = (imggrp.diffx || 0), dy = (imggrp.diffy || 0);
 			if(imggrp.width) {
-				this.drawImage(imggrp[id], x - imggrp.diffx, y - imggrp.diffy, imggrp.width, imggrp.height);
+				this.drawImage(imggrp[id], x - dx, y - dy, imggrp.width, imggrp.height);
 			} else {
-				this.drawImage(imggrp[id], x - imggrp.diffx, y - imggrp.diffy);
-			}
-		};
-		return c;
-	}
-
-	var layer = [];
-
-	return { 
-		create: function(c) {
-		var handler = {
-		context: null,
-		Point: function(x, y) {
-				this.x = x; this.y = y;
-			},
-		Rectangle: function(x, y ,w, h) {
-				this.x = x; this.y = y; this.width = w; this.height = h;
-			},
-		addLayer: function(l) {
-				layer.push(l);
-			},
-		draw: function() {
-				for(var i in layer) layer[i](this.context);
-			},
-		loadImageResource: function(url, f) {
-				loadImageRes(url, f);
+				this.drawImage(imggrp[id], x - dx, y - dy);
 			}
 		}
-		
-		handler.context =  initContext(c);
+	}
+
+	return {
+		create: function(c) {
+		var handler = {
+			Point: function(x, y) {
+					this.x = x; this.y = y;
+				},
+			Rectangle: function(x, y ,w, h) {
+					this.x = x; this.y = y; this.width = w; this.height = h;
+				},
+			addLayer: function(l) {
+					layer.push(l);
+				},
+			draw: function() {
+					for(var i in layer) layer[i](this.context);
+				},
+			loadImageResource: function(url, f) {
+					loadImageRes(url, f);
+				},
+			context: c.getContext("2d")
+		}
+
+		$.extend(handler.context, RingContext2d);
 		return handler;
 	}} 
 
