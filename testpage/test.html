@@ -14,7 +14,7 @@
 <title>ring.js</title>
 
 <style>
- canvas#test { 
+ canvas { 
     border: solid 4px #aaa;
  }
 </style>
@@ -22,7 +22,8 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="../ring.js"></script>
 
-<canvas id="test" width="300" height="300">error : not impl canvas.</canvas>
+<canvas id="test" width="300" height="300">error : not impl canvas.</canvas><p/>
+<canvas id="test2" width="300" height="300">error : not impl canvas.</canvas><p/>
 
 <script type="text/javascript">
 $().ready(function() {
@@ -83,6 +84,15 @@ $().ready(function() {
 	});
 
 	r.draw();
+
+	var r2 = jp.jvx.ring.create(document.getElementById("test2"));
+	r2.addLayer(function(c) {
+		c.beginPath();
+		c.fillRect(20, 20, 80, 40);
+	});
+
+	r2.draw();
+
 });
 </script>
 
