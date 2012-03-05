@@ -1,0 +1,14 @@
+{
+  "style1": {
+    "strokeStyle": "#eee",
+    "shadowOffsetX": 0,
+    "shadowOffsetY": 0,
+    "shadowBlur": 0,
+    "lineCap": "butt",
+    "lineWidth": 1
+  },
+  "style2": {
+    "strokeStyle": "#888",
+    "fillStyle": "grad 0,0,0,100 0,#fff 1,#ccc"
+  }
+}

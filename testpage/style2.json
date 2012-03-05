@@ -1,0 +1,19 @@
+{
+  "style1": {
+    "shadowColor": "#dddddd",
+    "shadowOffsetX": 3,
+    "shadowOffsetY": 1,
+    "shadowBlur": 2,
+    "fillStyle": "red"
+  },
+  "style2": {
+    "lineWidth": 3,
+    "shadowOffsetX": 0,
+    "shadowOffsetY": 0,
+    "shadowBlur": 0,
+    "font": "24px times",
+    "fillStyle": "blue",
+    "textAlign": "right",
+    "textBaseline": "bottom"
+  }
+}

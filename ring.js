@@ -2,13 +2,12 @@ var jp = jp || {};
 jp.jvx = jp.jvx || {};
 jp.jvx.ring = jp.jvx.ring || function() {
 
-  function ResourceContainer() {
-    this.loadCount = 0;
-    this.loadFinFn = null;
-  }
-  ResourceContainer.prototype.load = function(url, f) {
+  function ResourceContainer() {}
+  ResourceContainer.prototype.load = function(url, f, context) {
     if(this.init) this.init();
     var t = this;
+    this.loadCount = 0;
+    this.loadFinFn = f;
 
     $.ajax({ 
       url: url,
@@ -16,7 +15,7 @@ jp.jvx.ring = jp.jvx.ring || function() {
       dataType: "json",
       timeout: 3000,
       success: function(j, dataType) {
-        t.analyze(j);
+        t.analyze(j, context);
         if((t.loadCount === 0) && f) f(true);
       },
       error: function(req, status, e) {
@@ -40,20 +39,19 @@ jp.jvx.ring = jp.jvx.ring || function() {
     this.img = {};
   };
   ImageContainer.prototype.analyze = function(j) {
+    this.img = j;
     for(var grp in j) {
-      var imgs = {};
       for(var key in j[grp]) {
-        var i = j[grp][key];
-        if(key.match(/^(width|height|diffx|diffy)$/)) {
-          imgs[key] = i;
-        } else {
-          imgs[key] = new Image();
-          imgs[key].onload = function() { this.countdown(); }
-          imgs[key].src = i;
+        if(!key.match(/^(width|height|diffx|diffy)$/)) {
+          var i = new Image();
+          with(this) {
+            i.onload = function() { countdown(); }
+          }
+          i.src = j[grp][key];
+          j[grp][key] = i;
           this.countup();
         }
       }
-      this.img[k] = imgs;
     }
   };
   ImageContainer.prototype.draw = function(c, grp, id, x, y) {
@@ -72,23 +70,23 @@ jp.jvx.ring = jp.jvx.ring || function() {
   StyleContainer.prototype.init = function() {
     this.style = {};
   };
-  StyleContainer.prototype.analyze = function(j) {
+  StyleContainer.prototype.analyze = function(j, c) {
+    this.style = j;
     for(var grp in j) {
-      var styles = {};
-      for(var key in j[grp]) {
-        var i = j[grp][key];
-        if((key === "fillStyle") && (i.indexOf("grad ") == 0)) {
-        } else {
-        }
+      if(!j[grp]["fillStyle"]) continue;
+      var i = j[grp]["fillStyle"];
+      if(i.indexOf("grad ") == 0) {
+        var s = i.split(/[ ,]/)
+        var grad = c.createLinearGradient.apply(c, s.slice(1, 5));
+        for(var p = 5; p < s.length; p += 2)
+          grad.addColorStop(parseFloat(s[p]), s[p + 1]);
+        j[grp]["fillStyle"] = grad;
       }
-      this.style[k] = styles;
     }
   };
   StyleContainer.prototype.setStyle = function(c, grp) {
     var styles = this.style[grp];
-    if(!styles) return;
-    for(var k in styles) {
-    }
+    if(styles) $.extend(c, styles);
   };
 
   // use drawTextBox
@@ -169,11 +167,11 @@ jp.jvx.ring = jp.jvx.ring || function() {
     },
     drawImage: function(grp, id, x, y) {
       if(!this.images) return;
-      this.images.draw(this, grp, id, x, y);
+      this.images.draw(this.context, grp, id, x, y);
     },
     setStyle: function(name) {
       if(!this.styles) return;
-      this.styles.setStyle(this, name);
+      this.styles.setStyle(this.context, name);
     },
     loadImage: function(url, f) {
       this.images = new ImageContainer();
@@ -181,7 +179,7 @@ jp.jvx.ring = jp.jvx.ring || function() {
     },
     loadStyle: function(url, f) {
       this.styles = new StyleContainer();
-      this.styles.load(url, f);
+      this.styles.load(url, f, this.context);
     }
   };
 
@@ -214,7 +212,6 @@ jp.jvx.ring = jp.jvx.ring || function() {
         context: c.getContext("2d"),
         layer: []
       }
-//      $.extend(handler.context, new RingContext2d());
       handler.context.ring = new RingContext2d(handler.context);
 
       return handler;
