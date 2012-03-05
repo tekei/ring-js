@@ -23,9 +23,9 @@ mailChartアプリで必要な機能のみを実装
 
 2. イメージ管理  
     指定したjsonファイルに記載されたイメージを一括取得。イメージ名で表示
-    * loadImageResource  
+    * loadImage  
     パラメータ = json URL, loaded callback
-    * drawImgResource  
+    * drawImage  
     パラメータ = group, name, x, y
     groupは、以下のパラメータを設定可能
       * width, height  
@@ -54,7 +54,7 @@ mailChartアプリで必要な機能のみを実装
       * textBaseline
       * linearGradient  
       fillStyleのみ利用可  
-      指定方法 = "grad" x1,y1,x2,y2 offset1,color1 ....
+      指定フォーマット = "grad" x1,y1,x2,y2 offset1,color1 ....
 
 4. viewport  
    表示領域に基づく描画、スクロール等を制御  
@@ -84,12 +84,6 @@ mailChartアプリで必要な機能のみを実装
     * drawTextBox  
     複数行文字列表示。入りきらない場合は、「...」と表示。ワードラップ制御未搭載  
     パラメータ = text, x, y, width, height, [行間スペース(px)]
-
-
-その他
-------
-contextに追加した関数のprefixはdraw, set, getとする　　  
-(超暫定仕様。あとで、ringに入れる)
 
 
 ライセンス
