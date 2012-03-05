@@ -73,9 +73,8 @@ jp.jvx.ring = jp.jvx.ring || function() {
   StyleContainer.prototype.analyze = function(j, c) {
     this.style = j;
     for(var grp in j) {
-      if(!j[grp]["fillStyle"]) continue;
       var i = j[grp]["fillStyle"];
-      if(i.indexOf("grad ") == 0) {
+      if(i && (i.indexOf("grad ") == 0)) {
         var s = i.split(/[ ,]/)
         var grad = c.createLinearGradient.apply(c, s.slice(1, 5));
         for(var p = 5; p < s.length; p += 2)
