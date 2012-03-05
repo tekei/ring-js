@@ -36,9 +36,9 @@ mailChartアプリで必要な機能のみを実装
 3. フォーマット管理  
    文字種、色などの設定をフォーマット名で一括設定  
     (jsonファイルに指定。CSSの読み込みは未搭載)
-    * loadFormatAsset  
+    * loadStyle  
     パラメータ = json URL, loaded callback
-    * setFormatAsset  
+    * setStyle   
     未設定パラメータは制御無し。指定可能パラメータは  
       * strokeStyle
       * fillStyle
@@ -88,9 +88,11 @@ mailChartアプリで必要な機能のみを実装
 
 その他
 ------
-基本的に、contextに追加した関数のprefixはdraw, set, getとする　　  
+contextに追加した関数のprefixはdraw, set, getとする　　  
 (超暫定仕様。あとで、ringに入れる)
+
 
 ライセンス
 ------
-MIT License
+とりあえず、MIT License。   
+(githubコミット時のデフォルトライセンスとかあればいいのに ....)

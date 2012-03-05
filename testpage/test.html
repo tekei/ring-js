@@ -28,37 +28,26 @@
 <script type="text/javascript">
 $().ready(function() {
 	var r = jp.jvx.ring.create(document.getElementById("test"));
-	r.loadImageResource("./image.json", function(){ r.draw(); });
+	r.loadImage("./image.json", function(){ r.draw(); });
+	r.loadStyle("./style.json", function(){ r.draw(); });
 
 	r.addLayer(function(c) {
 		// 動作検証用グリッド表示 (10 pixel/line)
 		c.clearRect(0, 0, 300, 300);
 
-		c.beginPath();
-		c.strokeStyle = "#eee";
-		c.shadowOffsetX = 0;
-		c.shadowOffsetY = 0;
-		c.shadowBlur = 0;
-		c.lineCap = "butt";
-		c.lineWidth = 1;
-
+		c.ring.setStyle("style1");
 		for(var x = 0; x < 400; x += 10) {
 			c.moveTo(x, 0); c.lineTo(x, 400);
 		}
 		for(var y = 0; y < 400; y += 10) {
 			c.moveTo(0, y); c.lineTo(400, y);
 		}
-
 		c.stroke();
 	});
 
 	r.addLayer(function(c) {
-		c.strokeStyle = "#888";
-		var grad = c.createLinearGradient(0, 0, 0, 100);
-		grad.addColorStop(0, '#fff');
-		grad.addColorStop(1, '#ccc');
-		c.fillStyle = grad;
-		c.drawRoundedSquare(50, 30, 100, 60, 20);
+		c.ring.setStyle("style2");
+		c.ring.drawRoundedSquare(50, 30, 100, 60, 20);
 	});
 
 	r.addLayer(function(c) {
@@ -66,21 +55,21 @@ $().ready(function() {
 		c.fillStyle = "#000";
 		var ctext0 = "Canvasで文章の折り曲げテスト。最後まで表示できない場合は、省略表示となります。";
 		// 省略パターン
-		c.drawTextBox(ctext0, 150, 80, 100, 40, 1);
+		c.ring.drawTextBox(ctext0, 150, 80, 100, 40, 1);
 		c.rect(150, 80, 100, 40);
 
 		// 全表示パターン 10pxの空き
-		c.drawTextBox(ctext0, 50, 150, 200, 45, 10);
+		c.ring.drawTextBox(ctext0, 50, 150, 200, 45, 10);
 		c.rect(50, 150, 200, 45);
 
 		c.stroke();
 	});
 
 	r.addLayer(function(c) {
-		c.drawImgResource("test1", "abc1", 50, 220);
-		c.drawImgResource("test1", "abc2", 100, 220);
-		c.drawImgResource("test2", "efg", 150, 220);
-		c.drawImgResource("test3", "efg", 200, 220);
+		c.ring.drawImage("test1", "abc1", 50, 220);
+		c.ring.drawImage("test1", "abc2", 100, 220);
+		c.ring.drawImage("test2", "efg", 150, 220);
+		c.ring.drawImage("test3", "efg", 200, 220);
 	});
 
 	r.draw();
