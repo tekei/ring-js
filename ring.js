@@ -3,90 +3,96 @@ jp.jvx = jp.jvx || {};
 jp.jvx.ring = jp.jvx.ring || function() {
 
   function ResourceContainer() {}
-  ResourceContainer.prototype.load = function(url, f, context) {
-    if(this.init) this.init();
-    var t = this;
-    this.loadCount = 0;
-    this.loadFinFn = f;
+  ResourceContainer.prototype = {
+    load: function(url, f, context) {
+      if(this.init) this.init();
+      var t = this;
+      this.loadCount = 0;
+      this.loadFinFn = f;
 
-    $.ajax({ 
-      url: url,
-      type: "POST", 
-      dataType: "json",
-      timeout: 3000,
-      success: function(j, dataType) {
-        t.analyze(j, context);
-        if((t.loadCount === 0) && f) f(true);
-      },
-      error: function(req, status, e) {
-        if(f) f(false, e);
+      $.ajax({ 
+        url: url,
+        type: "POST", 
+        dataType: "json",
+        timeout: 3000,
+        success: function(j, dataType) {
+          t.analyze(j, context);
+          if((t.loadCount === 0) && f) f(true);
+        },
+        error: function(req, status, e) {
+          if(f) f(false, e);
+        }
+      });
+    },
+    countup: function() {
+      this.loadCount++;
+    },
+    countdown = function() {
+      with(this) {
+        loadCount--;
+        if((loadCount === 0) && loadFinFn) loadFinFn(true);
       }
-    });
-  };
-  ResourceContainer.prototype.countup = function() {
-    this.loadCount++;
-  };
-  ResourceContainer.prototype.countdown = function() {
-    with(this) {
-      loadCount--;
-      if((loadCount === 0) && loadFinFn) loadFinFn(true);
     }
   };
 
   function ImageContainer() {}
   ImageContainer.prototype = new ResourceContainer();
-  ImageContainer.prototype.init = function() {
-    this.img = {};
-  };
-  ImageContainer.prototype.analyze = function(j) {
-    this.img = j;
-    for(var grp in j) {
-      for(var key in j[grp]) {
-        if(!key.match(/^(width|height|diffx|diffy)$/)) {
-          var i = new Image();
-          with(this) {
-            i.onload = function() { countdown(); }
+  $.extend(ImageContainer.prototype, {
+    init: function() {
+      this.img = {};
+    },
+    analyze: function(j) {
+      this.img = j;
+      for(var grp in j) {
+        for(var key in j[grp]) {
+          if(!key.match(/^(width|height|diffx|diffy)$/)) {
+            var i = new Image();
+            with(this) {
+              i.onload = function() { countdown(); }
+            }
+            i.src = j[grp][key];
+            j[grp][key] = i;
+            this.countup();
           }
-          i.src = j[grp][key];
-          j[grp][key] = i;
-          this.countup();
         }
       }
+    },
+    draw: function(c, grp, id, x, y) {
+      var imggrp = this.img[grp];
+      if(!imggrp) return;
+      var dx = (imggrp.diffx || 0), dy = (imggrp.diffy || 0);
+      if(imggrp.width) {
+        c.drawImage(imggrp[id], x - dx, y - dy, imggrp.width, imggrp.height);
+      } else {
+        c.drawImage(imggrp[id], x - dx, y - dy);
+      }
     }
-  };
-  ImageContainer.prototype.draw = function(c, grp, id, x, y) {
-    var imggrp = this.img[grp];
-    if(!imggrp) return;
-    var dx = (imggrp.diffx || 0), dy = (imggrp.diffy || 0);
-    if(imggrp.width) {
-      c.drawImage(imggrp[id], x - dx, y - dy, imggrp.width, imggrp.height);
-    } else {
-      c.drawImage(imggrp[id], x - dx, y - dy);
-    }
-  };
+  });
 
   function StyleContainer() {}
   StyleContainer.prototype = new ResourceContainer();
-  StyleContainer.prototype.init = function() {
-    this.style = {};
-  };
-  StyleContainer.prototype.analyze = function(j, c) {
-    this.style = j;
-    for(var grp in j) {
-      var i = j[grp]["fillStyle"];
-      if(i && (i.indexOf("grad ") == 0)) {
-        var s = i.split(/[ ,]/)
-        var grad = c.createLinearGradient.apply(c, s.slice(1, 5));
-        for(var p = 5; p < s.length; p += 2)
-          grad.addColorStop(parseFloat(s[p]), s[p + 1]);
-        j[grp]["fillStyle"] = grad;
+  $.extend(StyleContainer.prototype, {
+    init: function() {
+      this.style = {};
+    },
+    analyze: function(j, c) {
+      this.style = j;
+      for(var grp in j) {
+        var i = j[grp]["fillStyle"];
+        if(i && (i.indexOf("grad ") == 0)) {
+          var s = i.split(/[ ,]/)
+          var grad = c.createLinearGradient.apply(c, s.slice(1, 5));
+          for(var p = 5; p < s.length; p += 2)
+            grad.addColorStop(parseFloat(s[p]), s[p + 1]);
+          j[grp]["fillStyle"] = grad;
+        }
       }
+    },
+    setStyle: function(c, grp) {
+      var styles = this.style[grp];
+      if(styles) $.extend(c, styles);
     }
-  };
-  StyleContainer.prototype.setStyle = function(c, grp) {
-    var styles = this.style[grp];
-    if(styles) $.extend(c, styles);
-  };
+  });
 
   // use drawTextBox
   const contStr = '...'; 
@@ -198,8 +204,11 @@ jp.jvx.ring = jp.jvx.ring || function() {
             handler.layer.push(l);
           },
         draw: function() {
+            var param = {};
             with(handler) {
-              for(var i in layer) layer[i](context);
+              for(var i in layer) {
+                layer[i](context, param);
+              }
             }
           },
         loadImage: function(url, f) {

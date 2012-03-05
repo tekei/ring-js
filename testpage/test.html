@@ -76,19 +76,20 @@ $().ready(function() {
 
 	var r2 = jp.jvx.ring.create(document.getElementById("test2"));
 	r2.loadStyle("./style2.json", function(){ r2.draw(); });
-	r2.addLayer(function(c) {
+	r2.addLayer(function(c, p) {
 		c.clearRect(0, 0, 300, 300);
 		c.ring.setStyle("style1");
 		c.beginPath();
 		c.fillRect(20, 20, 20, 40);
+		p.testdata = "Abc";
 	});
-	r2.addLayer(function(c) {
+	r2.addLayer(function(c, p) {
 		c.ring.setStyle("style2");
 		c.moveTo(200, 0); c.lineTo(200, 400);
 		c.moveTo(0, 250); c.lineTo(400, 250);
 		c.stroke();
 
-		c.fillText("Abc", 200, 250);
+		c.fillText(p.testdata, 200, 250);
 	});
 
 	r2.draw();
